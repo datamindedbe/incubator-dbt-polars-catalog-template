@@ -1,0 +1,53 @@
+from dataclasses import dataclass
+
+from dbt.adapters.polars.catalogs import CatalogConfig, PolarsRelation, StorageCatalog
+
+
+@dataclass
+class {{ class_prefix }}CatalogConfig(CatalogConfig):
+    name: str
+    type: str
+    schema: str
+
+    def unique_field(self) -> str:
+        return self.name
+
+    def connection_keys(self) -> tuple[str, ...]:
+        return ("name",)
+
+
+class {{ class_prefix }}Catalog(StorageCatalog):
+    config: {{ class_prefix }}CatalogConfig
+
+    def __init__(
+        self,
+        config: {{ class_prefix }}CatalogConfig,
+        project_root: str,
+    ) -> None:
+        super().__init__(config)
+
+    def get_uri(self, relation: PolarsRelation) -> str:
+        raise NotImplementedError
+
+    def get_storage_options(self, uri: str) -> dict[str, str] | None:
+        raise NotImplementedError
+
+    def create_schema(self, relation: PolarsRelation) -> None:
+        raise NotImplementedError
+
+    def drop_schema(self, relation: PolarsRelation) -> None:
+        raise NotImplementedError
+
+    def list_schemas(self) -> list[str]:
+        raise NotImplementedError
+
+    def table_exists(self, relation: PolarsRelation) -> bool:
+        raise NotImplementedError
+
+    def drop_relation(self, relation: PolarsRelation) -> None:
+        raise NotImplementedError
+
+    def list_relations_without_caching(
+        self, schema_relation: PolarsRelation
+    ) -> list[PolarsRelation]:
+        raise NotImplementedError

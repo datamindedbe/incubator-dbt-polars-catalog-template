@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: ["main"]
+
+jobs:
+  generate:
+    name: "Generate and test / ${{ matrix.base_class }}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        base_class: ["StorageCatalog", "BaseCatalog"]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: astral-sh/setup-uv@v8.2.0
+
+      - name: Generate project
+        run: |
+          uvx copier copy --defaults --vcs-ref HEAD \
+            --data catalog_name=sample \
+            --data base_class=${{ matrix.base_class }} \
+            --data author_name=CI \
+            --data author_email=ci@example.com \
+            . "$RUNNER_TEMP/project"
+
+      - name: Lint and type check the generated project
+        working-directory: ${{ runner.temp }}/project
+        run: |
+          uv sync --python 3.12
+          uv run ruff check .
+          uv run ruff format --check .
+          uv run mypy
+
+      # Fails when a stub for an abstract method is missing
+      - name: Load the generated catalog
+        working-directory: ${{ runner.temp }}/project
+        run: |
+          uv run python -c "
+          from dbt.adapters.polars.catalogs import create_catalog, resolve_catalog_plugin
+          config = resolve_catalog_plugin('sample').config_class(
+              name='sample', type='sample', schema='unused'
+          )
+          print(type(create_catalog(config, '')).__name__)
+          "
+
+      # Replace the stubs with a local-directory reference implementation
+      - name: Test with the reference implementation
+        run: |
+          cp ci/catalog.py "$RUNNER_TEMP/project/dbt_polars_catalog_sample/catalog.py"
+          cat ci/conftest_options.py >> "$RUNNER_TEMP/project/tests/conftest.py"
+          cd "$RUNNER_TEMP/project"
+          uv run pytest -n auto
+          uv build
