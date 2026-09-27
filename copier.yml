@@ -18,10 +18,13 @@ catalog_name:
 
 base_class:
   type: str
-  help: Catalog class to extend
+  help: |
+    Catalog class to extend
+      - StorageCatalog (recommended): Write data in formats like delta, parquet, csv, ... Override only how to create schemas and where to write the data.
+      - BaseCatalog: Implement all operations
   choices:
-    "StorageCatalog (recommended): Write data in formats like delta, parquet, csv, ... Override only how to create schemas and where to write the data.": StorageCatalog
-    "BaseCatalog: Implement all operations": BaseCatalog
+    "StorageCatalog (recommended)": StorageCatalog
+    BaseCatalog: BaseCatalog
   default: StorageCatalog
 
 author_name:
