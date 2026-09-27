@@ -1,6 +1,14 @@
 # dbt-polars catalog template
 
-[Copier](https://copier.readthedocs.io) template for a custom [dbt-polars](https://github.com/datamindedbe/incubator-dbt-polars) catalog, published as its own package.
+[dbt-polars](https://github.com/datamindedbe/incubator-dbt-polars) integrates the flexibility and performance of Polars with the data governance and lineage capabilities of dbt.
+
+Since polars doesn't have a default warehouse, catalogs determine how and where data is stored. Catalogs are configured via the `catalog_type` key in the dbt `profile.yml` and are distributed as separate packages `dbt-polars-catalog-<catalog_type>`.
+
+See the [list of available catalogs](https://github.com/datamindedbe/incubator-dbt-polars/blob/main/docs/catalog-overview.md#catalog-reference). If none of these meet  your requirements, this repository provides a template for creating a new catalog extension.
+
+## Creating a new catalog
+
+This repository is a [Copier](https://copier.readthedocs.io) template that sets up such a package, ready to implement, test and publish:
 
 ```bash
 uvx copier copy gh:datamindedbe/incubator-dbt-polars-catalog-template dbt-polars-catalog-<name>
@@ -8,7 +16,7 @@ uvx copier copy gh:datamindedbe/incubator-dbt-polars-catalog-template dbt-polars
 
 Copier asks for:
 
-- `catalog_name`: the catalog `type` in profiles.yml. The package is named `dbt-polars-catalog-<catalog_name>`.
+- `catalog_name`: the `catalog_type` in the profile. The package is named `dbt-polars-catalog-<catalog_name>`.
 - `base_class`: the class your catalog extends.
 - `author_name`, `author_email`: package metadata.
 
